@@ -4,14 +4,30 @@ import React, { useEffect, useState } from "react";
 
 const OrderSummary = () => {
 
-  const { currency, router, getCartCount, getCartAmount } = useAppContext()
+  const { currency, router, getCartCount, getCartAmount, getToken ,user,cartItems,setCartItems } = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [userAddresses, setUserAddresses] = useState([]);
 
   const fetchUserAddresses = async () => {
-    setUserAddresses(addressDummyData);
+    try {
+      const token = await getToken();
+      const {data} = await axios.get('/api/user/addresses', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (data.success) {
+        setUserAddresses(data.addresses);
+        if (data.addresses.length > 0) {
+          setSelectedAddress(data.addresses[0]); // Set the first address as default
+        }
+      } else {
+        console.error(data.message);
+        // Handle error appropriately, e.g., show a toast notification
+      }
+    } catch (error) {
+     toast.error(error.message);
+    }
   }
 
   const handleAddressSelect = (address) => {
@@ -20,12 +36,20 @@ const OrderSummary = () => {
   };
 
   const createOrder = async () => {
-
+    try {
+       if (!selectedAddress) {
+        return toast.error("Please select an address before placing the order.");
+       }
+    } catch (error) {
+        
+      }
   }
 
   useEffect(() => {
+    if ( user ){
     fetchUserAddresses();
-  }, [])
+  }
+  }, [user])
 
   return (
     <div className="w-full md:w-96 bg-gray-500/5 p-5">

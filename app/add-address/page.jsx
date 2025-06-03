@@ -4,8 +4,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { useState } from "react";
+import { useAppContext } from "@/context/AppContext";
+
 
 const AddAddress = () => {
+
+    const { getToken , router } = useAppContext()
 
     const [address, setAddress] = useState({
         fullName: '',
@@ -18,10 +22,25 @@ const AddAddress = () => {
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
+        try {
+            const token = await getToken()
 
-    }
+            const {data} = await axios.post('/api/user/address/add', address, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (data.success) {
+                toast.success(data.message)
+                router.push('/cart')
+            }else{
+                toast.error(data.message);
+            }
+
+        } catch (error) {
+             toast.error(error.message)
+        }
 
     return (
+       
         <>
             <Navbar />
             <div className="px-6 md:px-16 lg:px-32 py-16 flex flex-col md:flex-row justify-between">
@@ -91,4 +110,5 @@ const AddAddress = () => {
     );
 };
 
-export default AddAddress;
+}
+ export default AddAddress;
