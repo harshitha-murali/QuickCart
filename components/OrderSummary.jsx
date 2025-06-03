@@ -40,8 +40,28 @@ const OrderSummary = () => {
        if (!selectedAddress) {
         return toast.error("Please select an address before placing the order.");
        }
+       let cartItemsArray = Object.keys(cartItems).map((key) => ({product:key, quantity: cartItems[key]}));
+       cartItemsArray = cartItemsArray.filter(item => item.quantity > 0)
+
+        if (cartItemsArray.length === 0) {
+          return toast.error("Your cart is empty. Please add items to your cart before placing an order.");
+        }
+      const token = await getToken()
+      const {data} = await axios.post('/api/order/create', {
+        items: cartItemsArray,
+        address: selectedAddress._id
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (data.success) {
+        toast.success("Order placed successfully!");
+        setCartItems({});
+        router.push('/order-placed');
+      } else {
+        toast.error(data.message);
+      }
     } catch (error) {
-        
+        toast.error(error.message);
       }
   }
 

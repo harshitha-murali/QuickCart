@@ -5,22 +5,40 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
+import axios from "axios";
 
 const Orders = () => {
 
-    const { currency } = useAppContext();
+    const { currency,getToken,user } = useAppContext();
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchSellerOrders = async () => {
-        setOrders(orderDummyData);
-        setLoading(false);
+        try {
+            const token = await getToken();
+            const { data } = await axios('/api/order/create/list/seller-orders', {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            if (data.success) {
+                setOrders(data.orders);
+                setLoading(false);
+            } else {
+                toasr.error(data.message);
+                // Handle error appropriately, e.g., show a toast notification
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
     }
 
     useEffect(() => {
+        if(user) {
+        
         fetchSellerOrders();
-    }, []);
+        }
+    }, [user]);
 
     return (
         <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
