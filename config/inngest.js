@@ -1,4 +1,4 @@
-import { Inngest } from "@inngest/inngest";
+import { Inngest } from "inngest";
 import connectDB from "./db";
 import { User } from "@clerk/nextjs/dist/types/server";
 
